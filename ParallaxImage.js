@@ -119,18 +119,20 @@ var ParallaxImage = React.createClass({
         ]
     }
 
-    let actualStyle = onPress ? {} : style;
+    // skewY: "0.001deg" need to avoid border aliasing when we use TouchableHighlight
+    // with transformation (https://github.com/facebook/react-native/issues/11911)
+    let actualStyle = onPress ? { transform: [{ skewY: "0.001deg" }] } : style;
 
     let parallaxedContent;
     if (this.props.parallaxedContent) {
-        var tmp = {
+        var parallaxProps = {
             ...props,
             style: [imageStyle, parallaxStyle],
             pointerEvents: "none"
         };
 
-        delete tmp.parallaxedContent;
-        parallaxedContent = React.cloneElement(this.props.parallaxedContent(), tmp);
+        delete parallaxProps.parallaxedContent;
+        parallaxedContent = React.cloneElement(this.props.parallaxedContent(), parallaxProps);
     } else {
         parallaxedContent = (
             <Animated.Image
