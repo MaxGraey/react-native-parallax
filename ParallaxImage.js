@@ -27,7 +27,8 @@ var ParallaxImage = React.createClass({
     overlayStyle:         View.propTypes.style,
     touchebleStyle:       View.propTypes.style,
     touchActiveOpacity:   React.PropTypes.number,
-    touchUnderlayColor:   React.PropTypes.string
+    touchUnderlayColor:   React.PropTypes.string,
+    parallaxedContent:    React.PropTypes.func,
   },
 
   getDefaultProps: function() {
@@ -118,7 +119,35 @@ var ParallaxImage = React.createClass({
         ]
     }
 
-    var actualStyle = onPress ? {} : style;
+    let actualStyle = onPress ? {} : style;
+
+    let parallaxedContent;
+    if (this.props.parallaxedContent) {
+        var tmp = {
+            ...props,
+            style: [imageStyle, parallaxStyle],
+            pointerEvents: "none"
+        };
+
+        delete tmp.parallaxedContent;
+        parallaxedContent = React.cloneElement(this.props.parallaxedContent(), tmp);
+    } else {
+        parallaxedContent = (
+            <Animated.Image
+                {...props}
+                style={[imageStyle, parallaxStyle]}
+                pointerEvents="none"
+            />
+        );
+    }
+
+    /*
+    <Animated.Image
+      {...props}
+      style={[imageStyle, parallaxStyle]}
+      pointerEvents="none"
+    />
+    */
 
     var content = (
       <View
@@ -126,11 +155,7 @@ var ParallaxImage = React.createClass({
         style={[actualStyle, styles.container]}
         onLayout={this.handleLayout}
       >
-        <Animated.Image
-          {...props}
-          style={[imageStyle, parallaxStyle]}
-          pointerEvents="none"
-        />
+        {parallaxedContent}
         <View style={[styles.overlay, overlayStyle]}>
           {children}
         </View>
